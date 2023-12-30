@@ -1,6 +1,12 @@
 import numpy as np
 import streamlit as st
-import joblib
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
 
 PAGE_CONFIG = {"page_title": "Currency Trend Prediction",
                "page_icon": "icon.jpg", "layout": "centered"}
@@ -38,14 +44,29 @@ input_high = st.text_input('High')
 input_low = st.text_input('Low')
 input_change = st.text_input('Change %')
 
-model = joblib.load(r'currency_prediction_model.pkl')
+# data analysis
+df = pd.read_csv('EUR_INR_data.csv')
+df.drop(['Date'], axis=1, inplace=True)
+df.drop(['Vol.'], axis=1, inplace=True)
+df['Change %'] = df['Change %'].str.replace('%', '').astype(float)
+features = ['Open', 'High', 'Low', 'Change %']
+X = df[features]
+y = df['Price']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+model = RandomForestRegressor(random_state=42)
+model.fit(X_train_scaled, y_train)
+
+# model = joblib.load(r'currency_prediction_model.pkl')
 
 if st.button('Submit'): 
 
     if input_open != '' and input_high != '' and input_low != '' and input_change != '':
 
         new_input = np.array([[int(input_open), int(input_high), int(input_low), int(input_change)]])
-        scaler = joblib.load(r'scaler.pkl')
+        # scaler = joblib.load(r'scaler.pkl')
         new_input_scaled = scaler.transform(new_input)
 
         predicted_price = model.predict(new_input_scaled)
