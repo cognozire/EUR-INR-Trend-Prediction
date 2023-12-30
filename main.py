@@ -38,14 +38,14 @@ input_high = st.text_input('High')
 input_low = st.text_input('Low')
 input_change = st.text_input('Change %')
 
-model = joblib.load('currency_prediction_model.pkl')
+model = joblib.load(r'currency_prediction_model.pkl')
 
 if st.button('Submit'): 
 
     if input_open != '' and input_high != '' and input_low != '' and input_change != '':
 
         new_input = np.array([[int(input_open), int(input_high), int(input_low), int(input_change)]])
-        scaler = joblib.load('scaler.pkl')
+        scaler = joblib.load(r'scaler.pkl')
         new_input_scaled = scaler.transform(new_input)
 
         predicted_price = model.predict(new_input_scaled)
